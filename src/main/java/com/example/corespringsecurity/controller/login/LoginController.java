@@ -1,5 +1,6 @@
 package com.example.corespringsecurity.controller.login;
 
+import com.example.corespringsecurity.domain.Account;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -19,17 +20,25 @@ public class LoginController {
             @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "exception", required = false) String exception
             , Model model
-    ){
+    ) {
         model.addAttribute("error", error);
         model.addAttribute("exception", exception);
         return "user/login/login";
     }
 
-@GetMapping("/logout")// GET 방식을 사용한 로그아웃 처리리
-   public String logout(HttpServletRequest request, HttpServletResponse response){
+    @GetMapping("/logout")// GET 방식을 사용한 로그아웃 처리리
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication!=null)
+        if (authentication != null)
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         return "redirect:/login";
+    }
+
+    @GetMapping("/denied")
+    public String accessDenied(@RequestParam(value = "exception", required = false) String exception, Model model){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("username", authentication.getName());
+        model.addAttribute("exception", exception);
+        return "/user/login/denied";
     }
 }
