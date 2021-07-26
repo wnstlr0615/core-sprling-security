@@ -1,5 +1,6 @@
 package com.example.corespringsecurity.security.config;
 
+import com.example.corespringsecurity.security.handler.CustomAuthenticationFailHandler;
 import com.example.corespringsecurity.security.handler.CustomAuthenticationSuccessHandler;
 import com.example.corespringsecurity.security.provider.CustomAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 @Configuration
@@ -30,7 +33,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Qualifier("formAuthenticationDetailsSource")
     private final AuthenticationDetailsSource authenticationDetailsSource;
 
-    private  final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private  final AuthenticationSuccessHandler customAuthenticationSuccessHandler;
+
+    private final AuthenticationFailureHandler customAuthenticationFailHandler;
     @Bean
     public AuthenticationProvider authenticationProvider(){
         return new CustomAuthenticationProvider();
@@ -55,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         CharacterEncodingFilter filter = new CharacterEncodingFilter();
         http.authorizeRequests()
-                .antMatchers("/", "/users").permitAll()
+                .antMatchers("/", "/users", "user/login/**", "/login*").permitAll()
                 .antMatchers("/mypage").hasRole("USER")
                 .antMatchers("/nessages").hasRole("MANAGER")
                 .antMatchers("/config").hasRole("ADMIN")
@@ -66,8 +71,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginPage("/login")
                 .loginProcessingUrl("/login_proc")
                 .defaultSuccessUrl("/")
-                .failureUrl("/login")
                 .successHandler(customAuthenticationSuccessHandler)
+                .failureHandler(customAuthenticationFailHandler)
                 .permitAll()
         ;
 
