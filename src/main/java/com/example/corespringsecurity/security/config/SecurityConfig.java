@@ -1,6 +1,8 @@
 package com.example.corespringsecurity.security.config;
 
+import com.example.corespringsecurity.security.handler.CustomAuthenticationSuccessHandler;
 import com.example.corespringsecurity.security.provider.CustomAuthenticationProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -20,21 +22,24 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
+
+    private final UserDetailsService userDetailsService;
+
+    @Qualifier("formAuthenticationDetailsSource")
+    private final AuthenticationDetailsSource authenticationDetailsSource;
+
+    private  final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     @Bean
     public AuthenticationProvider authenticationProvider(){
         return new CustomAuthenticationProvider();
     }
-    @Autowired
-    private UserDetailsService userDetailsService;
 
-    @Qualifier("formAuthenticationDetailsSource")
-    @Autowired
-    AuthenticationDetailsSource authenticationDetailsSource;
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -62,6 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginProcessingUrl("/login_proc")
                 .defaultSuccessUrl("/")
                 .failureUrl("/login")
+                .successHandler(customAuthenticationSuccessHandler)
                 .permitAll()
         ;
 

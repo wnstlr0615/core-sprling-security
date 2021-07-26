@@ -25,7 +25,7 @@ public class LoginController {
         return "user/login/login";
     }
 
-    @GetMapping("/logout")// GET 방식을 사용한 로그아웃 처리리
+@GetMapping("/logout")// GET 방식을 사용한 로그아웃 처리리
    public String logout(HttpServletRequest request, HttpServletResponse response){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication!=null)
